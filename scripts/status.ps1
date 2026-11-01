@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
   推进 sprint-status.yaml 的状态并自动提交。
 
@@ -104,7 +104,7 @@ function Save-StatusFile {
 function Invoke-Commit([string]$message, [switch]$AddAll) {
     if ($NoCommit) { Write-Host '  (跳过提交：-NoCommit)' -ForegroundColor DarkGray; return }
     if (-not (Test-Path -LiteralPath (Join-Path $repoRoot '.git'))) {
-        Write-Host '  (不是 git 仓库，只改了文件；先运行 status.ps1 init)' -ForegroundColor DarkYellow
+        Write-Host '  (没检测到版本管理 git，这次只改文件、不记录历史)' -ForegroundColor DarkYellow
         return
     }
     Push-Location $repoRoot
