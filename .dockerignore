@@ -1,0 +1,8 @@
+node_modules
+.git
+.env
+.npm-cache
+.mysql-test
+apps/admin/dist
+_bmad
+.agents

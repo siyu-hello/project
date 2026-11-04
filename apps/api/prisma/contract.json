@@ -1,0 +1,1651 @@
+{
+  "schemaVersion": "1",
+  "targetFamily": "sql",
+  "target": "mysql",
+  "profileHash": "5212eb1a1220f2d24de13f4efadd4c703f3a1098a5f57e09da0dc26ebb7201d0",
+  "roots": {
+    "account": {
+      "model": "Account",
+      "namespace": "__unbound__"
+    },
+    "activity": {
+      "model": "Activity",
+      "namespace": "__unbound__"
+    },
+    "audit": {
+      "model": "Audit",
+      "namespace": "__unbound__"
+    },
+    "capacity": {
+      "model": "Capacity",
+      "namespace": "__unbound__"
+    },
+    "ledger_entry": {
+      "model": "LedgerEntry",
+      "namespace": "__unbound__"
+    },
+    "login_failure": {
+      "model": "LoginFailure",
+      "namespace": "__unbound__"
+    },
+    "schema_migration": {
+      "model": "SchemaMigration",
+      "namespace": "__unbound__"
+    },
+    "session": {
+      "model": "Session",
+      "namespace": "__unbound__"
+    }
+  },
+  "domain": {
+    "namespaces": {
+      "__unbound__": {
+        "enum": {
+          "ActivityStatus": {
+            "codecId": "mysql/enum@1",
+            "members": [
+              {
+                "name": "PENDING",
+                "value": "PENDING"
+              },
+              {
+                "name": "PUBLISHED",
+                "value": "PUBLISHED"
+              },
+              {
+                "name": "CANCELLED",
+                "value": "CANCELLED"
+              }
+            ]
+          },
+          "EntryKind": {
+            "codecId": "mysql/enum@1",
+            "members": [
+              {
+                "name": "CREDIT",
+                "value": "CREDIT"
+              },
+              {
+                "name": "REDEEM",
+                "value": "REDEEM"
+              },
+              {
+                "name": "REFUND",
+                "value": "REFUND"
+              },
+              {
+                "name": "REVERSAL",
+                "value": "REVERSAL"
+              }
+            ]
+          },
+          "Pool": {
+            "codecId": "mysql/enum@1",
+            "members": [
+              {
+                "name": "admin",
+                "value": "admin"
+              },
+              {
+                "name": "students",
+                "value": "students"
+              },
+              {
+                "name": "staff",
+                "value": "staff"
+              }
+            ]
+          },
+          "Role": {
+            "codecId": "mysql/enum@1",
+            "members": [
+              {
+                "name": "ADMIN",
+                "value": "ADMIN"
+              },
+              {
+                "name": "STUDENT",
+                "value": "STUDENT"
+              },
+              {
+                "name": "PUBLISHER",
+                "value": "PUBLISHER"
+              },
+              {
+                "name": "REDEEMER",
+                "value": "REDEEMER"
+              },
+              {
+                "name": "REVOKED",
+                "value": "REVOKED"
+              }
+            ]
+          },
+          "Unit": {
+            "codecId": "mysql/enum@1",
+            "members": [
+              {
+                "name": "POINT",
+                "value": "POINT"
+              },
+              {
+                "name": "MINUTE",
+                "value": "MINUTE"
+              }
+            ]
+          }
+        },
+        "models": {
+          "Account": {
+            "fields": {
+              "activityId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "authorizationExpiresAt": {
+                "nullable": true,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "college": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              },
+              "createdAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "enabled": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/raw@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "sql": "tinyint(1)"
+                  }
+                }
+              },
+              "failedAttempts": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/int@1",
+                  "kind": "scalar"
+                }
+              },
+              "grade": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "identifier": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 40
+                  }
+                }
+              },
+              "lockedUntil": {
+                "nullable": true,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "mustChangePassword": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/raw@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "sql": "tinyint(1)"
+                  }
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              },
+              "passwordHash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 200
+                  }
+                }
+              },
+              "pool": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/enum@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "Pool",
+                  "namespaceId": "__unbound__",
+                  "plane": "domain"
+                }
+              },
+              "role": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/enum@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "Role",
+                  "namespaceId": "__unbound__",
+                  "plane": "domain"
+                }
+              },
+              "wechatOpenid": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 128
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "activityId": {
+                  "column": "activityId"
+                },
+                "authorizationExpiresAt": {
+                  "column": "authorizationExpiresAt"
+                },
+                "college": {
+                  "column": "college"
+                },
+                "createdAt": {
+                  "column": "createdAt"
+                },
+                "enabled": {
+                  "column": "enabled"
+                },
+                "failedAttempts": {
+                  "column": "failedAttempts"
+                },
+                "grade": {
+                  "column": "grade"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "identifier": {
+                  "column": "identifier"
+                },
+                "lockedUntil": {
+                  "column": "lockedUntil"
+                },
+                "mustChangePassword": {
+                  "column": "mustChangePassword"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "passwordHash": {
+                  "column": "passwordHash"
+                },
+                "pool": {
+                  "column": "pool"
+                },
+                "role": {
+                  "column": "role"
+                },
+                "wechatOpenid": {
+                  "column": "wechatOpenid"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "account"
+            }
+          },
+          "Activity": {
+            "fields": {
+              "capacity": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/int@1",
+                  "kind": "scalar"
+                }
+              },
+              "college": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              },
+              "endsAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "enrolled": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/int@1",
+                  "kind": "scalar"
+                }
+              },
+              "grade": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "publisherId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "startsAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "status": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/enum@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "ActivityStatus",
+                  "namespaceId": "__unbound__",
+                  "plane": "domain"
+                }
+              },
+              "title": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 200
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "capacity": {
+                  "column": "capacity"
+                },
+                "college": {
+                  "column": "college"
+                },
+                "endsAt": {
+                  "column": "endsAt"
+                },
+                "enrolled": {
+                  "column": "enrolled"
+                },
+                "grade": {
+                  "column": "grade"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "publisherId": {
+                  "column": "publisherId"
+                },
+                "startsAt": {
+                  "column": "startsAt"
+                },
+                "status": {
+                  "column": "status"
+                },
+                "title": {
+                  "column": "title"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "activity"
+            }
+          },
+          "Audit": {
+            "fields": {
+              "action": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 40
+                  }
+                }
+              },
+              "actorId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "afterValue": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/raw@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "sql": "json"
+                  }
+                }
+              },
+              "beforeValue": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/raw@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "sql": "json"
+                  }
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "occurredAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "reason": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 500
+                  }
+                }
+              },
+              "targetId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "action": {
+                  "column": "action"
+                },
+                "actorId": {
+                  "column": "actorId"
+                },
+                "afterValue": {
+                  "column": "afterValue"
+                },
+                "beforeValue": {
+                  "column": "beforeValue"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "occurredAt": {
+                  "column": "occurredAt"
+                },
+                "reason": {
+                  "column": "reason"
+                },
+                "targetId": {
+                  "column": "targetId"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "audit"
+            }
+          },
+          "Capacity": {
+            "fields": {
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/int@1",
+                  "kind": "scalar"
+                }
+              },
+              "staff": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/int@1",
+                  "kind": "scalar"
+                }
+              },
+              "students": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/int@1",
+                  "kind": "scalar"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "id": {
+                  "column": "id"
+                },
+                "staff": {
+                  "column": "staff"
+                },
+                "students": {
+                  "column": "students"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "capacity"
+            }
+          },
+          "LedgerEntry": {
+            "fields": {
+              "amount": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/int@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "kind": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/enum@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "EntryKind",
+                  "namespaceId": "__unbound__",
+                  "plane": "domain"
+                }
+              },
+              "occurredAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "reversesId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "ruleSnapshot": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/raw@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "sql": "json"
+                  }
+                }
+              },
+              "sourceId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "studentId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "unit": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/enum@1",
+                  "kind": "scalar"
+                },
+                "valueSet": {
+                  "entityKind": "enum",
+                  "entityName": "Unit",
+                  "namespaceId": "__unbound__",
+                  "plane": "domain"
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "amount": {
+                  "column": "amount"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "kind": {
+                  "column": "kind"
+                },
+                "occurredAt": {
+                  "column": "occurredAt"
+                },
+                "reversesId": {
+                  "column": "reversesId"
+                },
+                "ruleSnapshot": {
+                  "column": "ruleSnapshot"
+                },
+                "sourceId": {
+                  "column": "sourceId"
+                },
+                "studentId": {
+                  "column": "studentId"
+                },
+                "unit": {
+                  "column": "unit"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "ledger_entry"
+            }
+          },
+          "LoginFailure": {
+            "fields": {
+              "accountId": {
+                "nullable": true,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "identifier": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 40
+                  }
+                }
+              },
+              "ip": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 64
+                  }
+                }
+              },
+              "occurredAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "reason": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 40
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "accountId": {
+                  "column": "accountId"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "identifier": {
+                  "column": "identifier"
+                },
+                "ip": {
+                  "column": "ip"
+                },
+                "occurredAt": {
+                  "column": "occurredAt"
+                },
+                "reason": {
+                  "column": "reason"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "login_failure"
+            }
+          },
+          "SchemaMigration": {
+            "fields": {
+              "appliedAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "appliedAt": {
+                  "column": "appliedAt"
+                },
+                "name": {
+                  "column": "name"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "schema_migration"
+            }
+          },
+          "Session": {
+            "fields": {
+              "accountId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "expiresAt": {
+                "nullable": false,
+                "type": {
+                  "codecId": "mysql/datetime@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "precision": 3
+                  }
+                }
+              },
+              "hash": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/char@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 64
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "accountId": {
+                  "column": "accountId"
+                },
+                "expiresAt": {
+                  "column": "expiresAt"
+                },
+                "hash": {
+                  "column": "hash"
+                }
+              },
+              "namespaceId": "__unbound__",
+              "table": "session"
+            }
+          }
+        }
+      }
+    }
+  },
+  "storage": {
+    "namespaces": {
+      "__unbound__": {
+        "entries": {
+          "table": {
+            "account": {
+              "columns": {
+                "activityId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": true,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "authorizationExpiresAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": true,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "college": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": true,
+                  "typeParams": {
+                    "length": 100
+                  }
+                },
+                "createdAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "enabled": {
+                  "codecId": "sql/raw@1",
+                  "dataType": "sql/raw",
+                  "nullable": false,
+                  "typeParams": {
+                    "sql": "tinyint(1)"
+                  }
+                },
+                "failedAttempts": {
+                  "codecId": "mysql/int@1",
+                  "dataType": "mysql/int",
+                  "nullable": false
+                },
+                "grade": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": true,
+                  "typeParams": {
+                    "length": 100
+                  }
+                },
+                "id": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "identifier": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 40
+                  }
+                },
+                "lockedUntil": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": true,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "mustChangePassword": {
+                  "codecId": "sql/raw@1",
+                  "dataType": "sql/raw",
+                  "nullable": false,
+                  "typeParams": {
+                    "sql": "tinyint(1)"
+                  }
+                },
+                "name": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 100
+                  }
+                },
+                "passwordHash": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 200
+                  }
+                },
+                "pool": {
+                  "codecId": "mysql/enum@1",
+                  "dataType": "mysql/enum",
+                  "nullable": false,
+                  "typeParams": {
+                    "values": [
+                      "admin",
+                      "students",
+                      "staff"
+                    ]
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "Pool",
+                    "namespaceId": "__unbound__",
+                    "plane": "storage"
+                  }
+                },
+                "role": {
+                  "codecId": "mysql/enum@1",
+                  "dataType": "mysql/enum",
+                  "nullable": false,
+                  "typeParams": {
+                    "values": [
+                      "ADMIN",
+                      "STUDENT",
+                      "PUBLISHER",
+                      "REDEEMER",
+                      "REVOKED"
+                    ]
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "Role",
+                    "namespaceId": "__unbound__",
+                    "plane": "storage"
+                  }
+                },
+                "wechatOpenid": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": true,
+                  "typeParams": {
+                    "length": 128
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "wechatOpenid"
+                  ],
+                  "name": "account_wechatOpenid_idx_1836e8d5",
+                  "prefix": "account_wechatOpenid_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": [
+                {
+                  "columns": [
+                    "identifier"
+                  ]
+                },
+                {
+                  "columns": [
+                    "wechatOpenid",
+                    "identifier"
+                  ]
+                }
+              ]
+            },
+            "activity": {
+              "columns": {
+                "capacity": {
+                  "codecId": "mysql/int@1",
+                  "dataType": "mysql/int",
+                  "nullable": false
+                },
+                "college": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 100
+                  }
+                },
+                "endsAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "enrolled": {
+                  "codecId": "mysql/int@1",
+                  "dataType": "mysql/int",
+                  "nullable": false
+                },
+                "grade": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 100
+                  }
+                },
+                "id": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "publisherId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "startsAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "status": {
+                  "codecId": "mysql/enum@1",
+                  "dataType": "mysql/enum",
+                  "nullable": false,
+                  "typeParams": {
+                    "values": [
+                      "PENDING",
+                      "PUBLISHED",
+                      "CANCELLED"
+                    ]
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "ActivityStatus",
+                    "namespaceId": "__unbound__",
+                    "plane": "storage"
+                  }
+                },
+                "title": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 200
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "audit": {
+              "columns": {
+                "action": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 40
+                  }
+                },
+                "actorId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "afterValue": {
+                  "codecId": "sql/raw@1",
+                  "dataType": "sql/raw",
+                  "nullable": true,
+                  "typeParams": {
+                    "sql": "json"
+                  }
+                },
+                "beforeValue": {
+                  "codecId": "sql/raw@1",
+                  "dataType": "sql/raw",
+                  "nullable": true,
+                  "typeParams": {
+                    "sql": "json"
+                  }
+                },
+                "id": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "occurredAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "reason": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 500
+                  }
+                },
+                "targetId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "capacity": {
+              "columns": {
+                "id": {
+                  "codecId": "mysql/int@1",
+                  "dataType": "mysql/int",
+                  "nullable": false
+                },
+                "staff": {
+                  "codecId": "mysql/int@1",
+                  "dataType": "mysql/int",
+                  "nullable": false
+                },
+                "students": {
+                  "codecId": "mysql/int@1",
+                  "dataType": "mysql/int",
+                  "nullable": false
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "ledger_entry": {
+              "columns": {
+                "amount": {
+                  "codecId": "mysql/int@1",
+                  "dataType": "mysql/int",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "kind": {
+                  "codecId": "mysql/enum@1",
+                  "dataType": "mysql/enum",
+                  "nullable": false,
+                  "typeParams": {
+                    "values": [
+                      "CREDIT",
+                      "REDEEM",
+                      "REFUND",
+                      "REVERSAL"
+                    ]
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "EntryKind",
+                    "namespaceId": "__unbound__",
+                    "plane": "storage"
+                  }
+                },
+                "occurredAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "reversesId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": true,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "ruleSnapshot": {
+                  "codecId": "sql/raw@1",
+                  "dataType": "sql/raw",
+                  "nullable": false,
+                  "typeParams": {
+                    "sql": "json"
+                  }
+                },
+                "sourceId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "studentId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "unit": {
+                  "codecId": "mysql/enum@1",
+                  "dataType": "mysql/enum",
+                  "nullable": false,
+                  "typeParams": {
+                    "values": [
+                      "POINT",
+                      "MINUTE"
+                    ]
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "Unit",
+                    "namespaceId": "__unbound__",
+                    "plane": "storage"
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "studentId",
+                    "unit"
+                  ],
+                  "name": "ledger_entry_studentId_unit_idx_3071f376",
+                  "prefix": "ledger_entry_studentId_unit_idx",
+                  "unique": false
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "login_failure": {
+              "columns": {
+                "accountId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": true,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "id": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "identifier": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 40
+                  }
+                },
+                "ip": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 64
+                  }
+                },
+                "occurredAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "reason": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 40
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
+            },
+            "schema_migration": {
+              "columns": {
+                "appliedAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "name": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "name"
+                ]
+              },
+              "uniques": []
+            },
+            "session": {
+              "columns": {
+                "accountId": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "mysql/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 36
+                  }
+                },
+                "expiresAt": {
+                  "codecId": "mysql/datetime@1",
+                  "dataType": "mysql/datetime",
+                  "nullable": false,
+                  "typeParams": {
+                    "precision": 3
+                  }
+                },
+                "hash": {
+                  "codecId": "sql/char@1",
+                  "dataType": "mysql/char",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 64
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [],
+              "primaryKey": {
+                "columns": [
+                  "hash"
+                ]
+              },
+              "uniques": []
+            }
+          },
+          "valueSet": {
+            "ActivityStatus": {
+              "kind": "valueSet",
+              "values": [
+                "PENDING",
+                "PUBLISHED",
+                "CANCELLED"
+              ]
+            },
+            "EntryKind": {
+              "kind": "valueSet",
+              "values": [
+                "CREDIT",
+                "REDEEM",
+                "REFUND",
+                "REVERSAL"
+              ]
+            },
+            "Pool": {
+              "kind": "valueSet",
+              "values": [
+                "admin",
+                "students",
+                "staff"
+              ]
+            },
+            "Role": {
+              "kind": "valueSet",
+              "values": [
+                "ADMIN",
+                "STUDENT",
+                "PUBLISHER",
+                "REDEEMER",
+                "REVOKED"
+              ]
+            },
+            "Unit": {
+              "kind": "valueSet",
+              "values": [
+                "POINT",
+                "MINUTE"
+              ]
+            }
+          }
+        },
+        "id": "__unbound__"
+      }
+    },
+    "storageHash": "a69438222745e40b7a7a25ea5a525005d034d2c672ec2fae9e8a41831ee8465e"
+  },
+  "capabilities": {
+    "sql": {
+      "enums": true,
+      "foreignKeys": true,
+      "limit": true,
+      "orderBy": true
+    }
+  },
+  "extensions": {},
+  "meta": {},
+  "_generated": {
+    "warning": "⚠️  GENERATED FILE - DO NOT EDIT",
+    "message": "This file is automatically generated by \"prisma contract emit\".",
+    "regenerate": "To regenerate, run: prisma contract emit"
+  }
+}

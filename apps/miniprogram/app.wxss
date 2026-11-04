@@ -1,0 +1,1 @@
+page{background:#f4f7fb;color:#17263d;font-size:30rpx}.page{padding:40rpx;display:flex;flex-direction:column;gap:26rpx}.title{font-size:46rpx;font-weight:600}.card{padding:30rpx;background:white;border-radius:20rpx;display:flex;flex-direction:column;gap:24rpx}input{padding:20rpx;border:1rpx solid #d8e0eb}.error{color:#b33636}button{width:100%;font-size:30rpx}

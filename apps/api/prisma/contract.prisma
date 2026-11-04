@@ -1,0 +1,113 @@
+// use prisma-8
+// Prisma 8 MySQL preview: DDL in migrations/001_identity.sql also defines FKs and CHECKs.
+enum Role {
+  ADMIN
+  STUDENT
+  PUBLISHER
+  REDEEMER
+  REVOKED
+}
+enum Pool {
+  admin
+  students
+  staff
+}
+enum ActivityStatus {
+  PENDING
+  PUBLISHED
+  CANCELLED
+}
+enum Unit {
+  POINT
+  MINUTE
+}
+enum EntryKind {
+  CREDIT
+  REDEEM
+  REFUND
+  REVERSAL
+}
+model Account {
+  id sql.String(36) @id
+  identifier sql.String(40) @unique
+  name sql.String(100)
+  college sql.String(100)?
+  grade sql.String(100)?
+  role Role
+  pool Pool
+  passwordHash sql.String(200)
+  wechatOpenid sql.String(128)?
+  enabled Raw(sql`tinyint(1)`)
+  mustChangePassword Raw(sql`tinyint(1)`)
+  failedAttempts Int
+  lockedUntil DateTime?
+  authorizationExpiresAt DateTime?
+  activityId sql.String(36)?
+  createdAt DateTime
+  @@unique([wechatOpenid, identifier])
+  @@index([wechatOpenid])
+  @@map("account")
+}
+model Session {
+  hash sql.Char(64) @id
+  accountId sql.String(36)
+  expiresAt DateTime
+  @@map("session")
+}
+model Capacity {
+  id Int @id
+  students Int
+  staff Int
+  @@map("capacity")
+}
+model LoginFailure {
+  id sql.String(36) @id
+  accountId sql.String(36)?
+  identifier sql.String(40)
+  ip sql.String(64)
+  reason sql.String(40)
+  occurredAt DateTime
+  @@map("login_failure")
+}
+model Audit {
+  id sql.String(36) @id
+  actorId sql.String(36)
+  targetId sql.String(36)
+  action sql.String(40)
+  reason sql.String(500)
+  beforeValue Raw(sql`json`)?
+  afterValue Raw(sql`json`)?
+  occurredAt DateTime
+  @@map("audit")
+}
+model Activity {
+  id sql.String(36) @id
+  publisherId sql.String(36)
+  title sql.String(200)
+  college sql.String(100)
+  grade sql.String(100)
+  status ActivityStatus
+  startsAt DateTime
+  endsAt DateTime
+  capacity Int
+  enrolled Int
+  @@map("activity")
+}
+model LedgerEntry {
+  id sql.String(36) @id
+  studentId sql.String(36)
+  unit Unit
+  amount Int
+  kind EntryKind
+  sourceId sql.String(36)
+  reversesId sql.String(36)?
+  ruleSnapshot Raw(sql`json`)
+  occurredAt DateTime
+  @@index([studentId, unit])
+  @@map("ledger_entry")
+}
+model SchemaMigration {
+  name sql.String(100) @id
+  appliedAt DateTime
+  @@map("schema_migration")
+}

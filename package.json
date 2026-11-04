@@ -1,0 +1,12 @@
+{
+  "name": "campus-identity", "private": true, "type": "module",
+  "engines": {"node": ">=24.11 <25"},
+  "workspaces": ["apps/api", "apps/admin"],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "node --test tests/*.test.mjs",
+    "test:mysql": "node --test tests/mysql.integration.mjs",
+    "db:migrate": "npm run db:migrate -w apps/api",
+    "db:seed": "npm run db:seed -w apps/api"
+  }
+}
