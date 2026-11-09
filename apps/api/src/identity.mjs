@@ -164,7 +164,9 @@ export class IdentityService {
         if (!activity || new Date(activity.endsAt) <= new Date()) throw new DomainError(400, '临时授权活动不存在或已结束');
         authorizationExpiresAt = activity.endsAt; activityId = activity.id;
       }
-      const updated = { ...account, role, enabled: input.enabled ?? Boolean(account.enabled), authorizationExpiresAt, activityId };
+      // 回收角色同时停用账号，避免 role 与 enabled 出现相互矛盾的状态。
+      const enabled = role === 'REVOKED' ? false : input.enabled ?? Boolean(account.enabled);
+      const updated = { ...account, role, enabled, authorizationExpiresAt, activityId };
       await tx.updateAccount(updated);
       await tx.audit(actor.id, id, 'ACCOUNT_UPDATE', reason, publicAccount(account), publicAccount(updated));
       return publicAccount(updated);
