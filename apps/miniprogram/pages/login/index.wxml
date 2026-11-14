@@ -1,2 +1,42 @@
-<view class="page"><text class="title">校园活动</text><text>使用已开通的独立账号登录</text><button bindtap="login" loading="{{busy}}" disabled="{{busy}}">微信一键登录</button><view wx:for="{{accounts}}" wx:key="id"><button bindtap="login" data-id="{{item.id}}">进入 {{item.identifier}} · {{item.role}}</button></view><view class="card"><text>首次使用 · 绑定已有账号</text><input placeholder="学号 / 独立角色账号" value="{{identifier}}" bindinput="identifierInput"/><input placeholder="管理员告知的初始密码" password value="{{password}}" bindinput="passwordInput"/><button bindtap="login" data-bind="{{true}}" loading="{{busy}}" disabled="{{busy}}">验证并绑定</button></view><text class="error">{{error}}</text><text>账号尚未开通时，请联系管理员。参与活动与发布、核销须分别使用独立账号。</text></view>
+<view class="login">
+  <view class="login-header">
+    <text class="login-brand">校园活动</text>
+    <text class="login-title">欢迎回来</text>
+    <text class="login-intro">登录后报名活动、查看积分和志愿时长。</text>
+  </view>
 
+  <view class="login-methods">
+    <button class="login-tab {{mode === 'wechat' ? 'selected' : ''}}" bindtap="switchMode" data-mode="wechat" disabled="{{busy}}">微信登录</button>
+    <button class="login-tab {{mode === 'password' ? 'selected' : ''}}" bindtap="switchMode" data-mode="password" disabled="{{busy}}">账号密码</button>
+  </view>
+
+  <text wx:if="{{notice}}" class="login-message">{{notice}}</text>
+  <text wx:if="{{error}}" class="login-message failed">{{error}}</text>
+
+  <block wx:if="{{mode === 'wechat' && !bindingOpen}}">
+    <view wx:if="{{accounts.length}}" class="login-accounts">
+      <button wx:for="{{accounts}}" wx:key="id" class="account-option" bindtap="chooseAccount" data-id="{{item.id}}" disabled="{{busy}}">{{item.identifier}} · {{item.role}} <text>›</text></button>
+    </view>
+    <button wx:else class="login-submit" bindtap="login" loading="{{busy}}" disabled="{{busy}}">微信一键登录</button>
+    <button class="login-link" bindtap="toggleBinding" disabled="{{busy}}">首次使用？绑定已有账号</button>
+  </block>
+
+  <view wx:else class="login-form">
+    <text wx:if="{{mode === 'wechat'}}" class="login-intro">使用管理员下发的账号和初始密码绑定微信。</text>
+    <view class="login-field">
+      <text>学号 / 账号</text>
+      <input placeholder="请输入学号或账号" placeholder-class="login-placeholder" value="{{identifier}}" bindinput="identifierInput" />
+    </view>
+    <view class="login-field">
+      <text>{{mode === 'wechat' ? '初始密码' : '密码'}}</text>
+      <input password placeholder="请输入密码" placeholder-class="login-placeholder" value="{{password}}" bindinput="passwordInput" />
+    </view>
+    <button wx:if="{{mode === 'wechat'}}" class="login-submit" bindtap="login" data-bind="{{true}}" loading="{{busy}}" disabled="{{busy}}">验证并绑定微信</button>
+    <button wx:else class="login-submit" bindtap="passwordLogin" loading="{{busy}}" disabled="{{busy}}">登录</button>
+    <button wx:if="{{mode === 'wechat'}}" class="login-link" bindtap="toggleBinding" disabled="{{busy}}">返回微信登录</button>
+  </view>
+
+  <view class="login-footer">
+    <text>账号未开通，请联系管理员。</text>
+  </view>
+</view>

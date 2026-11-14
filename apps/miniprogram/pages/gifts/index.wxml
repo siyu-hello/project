@@ -1,0 +1,30 @@
+<view class="editorial gifts">
+  <view class="ed-heading"><text class="ed-title">文创商城</text><button class="ed-link" bindtap="openOrders">我的订单 ›</button></view>
+  <view class="shop-balance"><text>可用积分</text><text class="shop-points">{{balance}}</text></view>
+  <text wx:if="{{error}}" class="error">{{error}}</text>
+
+  <view wx:if="{{loading}}" class="skeleton">
+    <view class="sk-card"></view><view class="sk-card"></view>
+  </view>
+
+  <view wx:else class="gift-grid">
+    <view wx:for="{{items}}" wx:key="id" class="shop-item">
+      <image wx:if="{{item.imageUrl}}" class="gift-img" src="{{item.imageUrl}}" mode="aspectFit" lazy-load binderror="imageError" data-index="{{index}}" />
+      <view wx:else class="gift-ph">暂无图片</view>
+      <view class="gift-body">
+        <text class="gift-name">{{item.name}}</text>
+        <text class="tiny">{{item.description}}</text>
+        <view class="between">
+          <text class="points">{{item.pointsText}}</text>
+          <text class="tiny">{{item.stockText}}</text>
+        </view>
+        <button class="shop-action" bindtap="redeem" data-id="{{item.id}}" loading="{{busy === item.id}}" disabled="{{!item.canRedeem || busy !== ''}}">
+          {{item.soldOut ? '已兑完' : (item.canRedeem ? '立即兑换' : '积分不足')}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <text class="ed-note">兑换后请在 7 天内核销，过期自动退还积分。</text>
+  <text wx:if="{{!loading && !items.length && !error}}" class="empty">商城暂无上架礼品</text>
+</view>

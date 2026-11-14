@@ -1,94 +1,129 @@
-# 校园活动平台 · 身份与权限
+# 校园活动平台 · 积分与文创兑换
 
-本次实现 Epic 1：管理员登录及首次改密、CSV 学生名单导入、独立角色账号管理、微信首次绑定与后续一键登录、每请求数据库授权、审计和本人首页查询。仓库原有 scripts/ 菜单保留。
+Epic 1–7 全部 18 个故事的可运行实现：身份与权限、活动发布与审核、报名与名额、动态二维码签到与签退、双账户账本、缺席结算与禁报、文创礼品兑换/核销/过期返还。
 
-## 启动
+界面：后台为深色侧栏 + 卡片式工作台；小程序为渐变主视觉 + 活动流首页 / 文创商城 / 个人中心，现场签到签退统一扫描 10 秒动态二维码。
 
-需要 Node **24.11+（24 LTS）**、MySQL **8.4**；容器方式需要 Docker Compose v2。
+## 技术栈
 
-```sh
-cp .env.example .env
-# 编辑数据库凭据、管理员初始密码、角色账号初始密码及微信配置
-docker compose up --build
+- Node.js 24（原生 ESM，无转译器）+ NestJS 12 + Express 5
+- Prisma 8 preview 的 MySQL 驱动（`@prisma/orm-mysql`），全部业务写入走参数化 raw SQL + 事务
+- MySQL 8（`DATETIME(3)`、原生 `JSON`、CHECK、唯一约束）
+- 后台：Vue 3 + Vite 7 + Element Plus
+- 学生端：微信原生小程序（`apps/miniprogram`，无需构建）
+
+## 目录
+
+```
+apps/api        API、领域服务、迁移（prisma/migrations）、种子
+apps/admin      管理后台 / 发布者工作台 / 核销台（同一 SPA，按角色显示）
+apps/miniprogram 微信小程序（学生、核销员）
+tests           tests/e2e.mjs（HTTP 全流程）、tests/domain.mjs（时长/禁报/过期）
+scripts         本机启动与演示数据脚本
 ```
 
-后台 http://localhost:8080；API http://localhost:3000。Compose 等待数据库就绪后幂等执行迁移、创建初始管理员，再启动 API。已有管理员不会被环境配置重置密码。MySQL 命名卷持久化，默认不清理账号、审计或业务历史；留存至少两个学期需要部署方备份和保留卷。数据库密码放入 URL 前须 URL 编码；示例使用 URL 安全字符以简化 Compose 配置。
+## 启动（本机）
 
-本地开发（PowerShell 用 Copy-Item .env.example .env）：
+前置：Node 24.11+、MySQL 8。`.env` 需包含 `DATABASE_URL`、`ADMIN_IDENTIFIER`、`ADMIN_INITIAL_PASSWORD`、`INITIAL_ACCOUNT_PASSWORD`、`CHECKIN_SECRET`、`ADMIN_ORIGIN`、`PORT`。
 
 ```sh
 npm ci
-npm run db:migrate
-npm run db:seed
-npm start --workspace apps/api
-# 另一个终端
-npm run dev --workspace apps/admin
+npm run db:migrate      # 001 身份 + 002 活动/报名/签到/礼品，幂等
+npm run db:seed         # 初始化管理员（已存在则不改密码）
+npm run demo:seed       # 可选：演示账号、活动、礼品、当场可签到/签退的演示活动
+npm start --workspace apps/api       # API :3000
+npm run dev --workspace apps/admin   # 后台 :5173（/api 代理到 3000）
 ```
 
-本地 .env 的 DATABASE_URL 应指向已创建的 MySQL 数据库；后台开发地址 http://localhost:5173，将 ADMIN_ORIGIN 改为此值。API 不信任任意 X-Forwarded-For，失败来源 IP 是直接连接地址；代理部署时记录代理地址。
+- 后台：<http://127.0.0.1:5173>
+- API 健康检查：<http://127.0.0.1:3000/health>
+- 小程序：微信开发者工具导入 `apps/miniprogram`，在 `utils/api.js` 的 `DEFAULT_BASE` 配置可访问的 API。模拟器可用 `http://127.0.0.1:3000`。真机发布版需配置设备可访问的 HTTPS API 域名，并在微信后台配置合法域名。
+- 图片上传：后台发布活动凭证、维护礼品图片时直接选图，文件保存到仓库 `uploads/`（已 gitignore），通过 `/uploads/<文件名>` 访问；后台 Vite 已代理 `/uploads`，小程序用 `api.assetUrl()` 拼接当前服务器地址。
 
-## 使用
+生产用 Docker Compose：`docker compose up --build` 会自动迁移、初始化管理员并启动 API 与后台（后台 8080）。本次验证环境未安装 Docker，Compose 未实跑。
 
-1. 用 ADMIN_IDENTIFIER、ADMIN_INITIAL_PASSWORD 登录后台，首次先改成至少10字符的新密码。改密撤销所有旧管理员会话。
-2. 上传 UTF-8 CSV，表头必须且仅有 学号,姓名,学院,年级，不需要密码列。1–20行，缺列、重复、空字段、格式错误或累计超容量均整批拒绝；已存在学生返回计数。保留学号前导零。
-3. 管理员告知 INITIAL_ACCOUNT_PASSWORD，学生用微信身份、学号、初始密码首次绑定，以后一键登录。密码只在创建时生成 scrypt 哈希，更换环境配置不会改动既有账号。
-4. 后台可开通独立发布者或核销员、回收单一角色或停用。学生池累计最多20个，发布者和核销员池累计最多10个；停用或回收仍占原池名额，保留历史，不能借回收无限扩容。学生不能改成职员账号。
-5. 临时核销授权填写已存在活动ID，服务端取结束时间，每请求还查活动当前结束时间，活动结束立即拒绝。活动创建不属于本史诗，初始没有活动可选。
+## 演示账号
 
-CSV格式示例（不会自动导入）：
+| 角色 | 账号 | 密码 | 入口 |
+|---|---|---|---|
+| 管理员 | `admin` | `AdminCampus2026`（已重置，登录后可在左下角修改） | 后台 |
+| 发布者 | `pub1` | `123456` | 后台「发布活动 / 我的活动」 |
+| 核销员 | `red1` | `123456` | 后台「核销」或小程序核销页 |
+| 学生 | `S2026001` | `123456` | 小程序（也支持微信一键登录） |
 
-```csv
-学号,姓名,学院,年级
-20260001,张三,计算机与大数据学院,26
-```
+`npm run demo:seed` 会幂等补齐上述账号、4 场常规活动、1 场待审核活动、3 种带图片的礼品，并刷新「即时签到演示 / 现场签退演示」两场活动的相对时间与 S2026001 的报名状态，便于现场演示扫码签到入账与扫码签退计时。演示图片位于 `samples/images/`，脚本会复制到 `uploads/` 并写入凭证/礼品图片字段。
 
-## 微信接入
+### 小程序导航
 
-微信开发者工具导入 apps/miniprogram/，将 project.config.json 的 touristappid 换为真实 AppID，设置 app.js 的 apiBase 为部署后 HTTPS API 地址，在微信后台配置合法 request 域名，服务端 .env 配置同一 AppID 和 Secret。开发工具可用 localhost 并关闭合法域名校验；真机必须使用可访问的 HTTPS 域名。
-
-生产代码只调用官方 code2session，没有开发code、伪造openid或mock登录后门。仅测试依赖注入替换交换服务，不连接线上微信。session_key 不保存、不返回；Secret只在服务端。同一微信可绑定多个独立账号，一键登录时选择账号；每个会话只携带一个账号，权限不合并。已绑定账号不能凭初始密码被另一微信重新绑定。
-
-管理员和绑定凭据连续错5次锁10分钟，数据库记录失败时间和IP，客户端显示剩余秒数。密码 scrypt 加盐；2小时随机会话仅存 SHA-256 哈希。每请求查会话与最新账号角色、状态和授权期限。请求内容与异常详情日志关闭，审计也不包含密码、token、微信密钥。
-
-## 接口与查询边界
-
-| 接口 | 权限与结果 |
+| 页面 | 内容 |
 |---|---|
-| POST /auth/admin/login | 管理员账密，首次只允许身份查询、改密、退出 |
-| POST /auth/wechat/login | code；首次另带identifier/password；多个绑定返回账号选择，以新code和accountId重试 |
-| GET /me | 本人账号白名单字段 |
-| POST /auth/password | 管理员oldPassword/newPassword |
-| POST /auth/logout | 撤销当前会话 |
-| GET /students/me/home | 本人积分、志愿分钟聚合及匹配学院年级活动 |
-| GET /students/:id/home | 只允许本人，跨学生403 |
-| GET/POST /admin/accounts | 管理员查询或创建独立发布者/核销员 |
-| PATCH /admin/accounts/:id | 更新role、enabled、activityId，reason必填 |
-| POST /admin/roster/import | 管理员提交csv、reason |
-| GET /admin/audits | 操作人、原因、前后值与UTC时间 |
+| 活动（首页） | 面向本人学院年级的可报名活动，支持筛选、排序、下拉刷新，前台每 15 秒更新 |
+| 商城 | 文创礼品图片卡片、积分余额、兑换与订单入口 |
+| 我的 | 个人信息、可用积分/志愿时长、积分明细/订单/商城快捷入口、我的报名与签到签退入口 |
 
-受保护接口使用 Authorization: Bearer token。未登录401，越权、停用或到期403，锁定423。管理员不能停用或回收自己。
+签到与签退都在活动详情页完成：点击「扫码签到 / 扫码签退」扫描现场投屏的动态二维码；扫码不可用时保留 6 位动态码手动输入作为兜底。二维码内容为 `CAMPUS|CHECKIN|活动ID|6位码`（签退为 `CHECKOUT`），10 秒轮换，截图或转发旧码会失效。
 
-首页余额来自 ledger_entry.amount 按 studentId/unit 聚合，积分和分钟分开，不设另一套余额。列表查询 PUBLISHED、本人学院年级、尚未开始且未满的活动。真实空表返回0和空列表，无演示数据。活动、签到、兑换、流水入账和完整报名资格判定留到后续史诗，本次只建立查询侧结构与契约。
+兑换成功后，小程序会打开订单并出示兑换二维码。学生也可以在「我的订单」再次出示，核销员用小程序扫码，网页核销台可手动输入 12 位码。
 
-## Prisma 8 实施决策
+## 功能与规则
 
-锁定 CLI prisma@8.0.0-rc.30、MySQL库 @prisma/orm-mysql@8.0.0-rc.22、NestJS12.3.3、Vue3.5.44、Vite7.3.7，完整依赖在 package-lock.json。
+| 能力 | 实现要点 |
+|---|---|
+| 发布活动 | 标题/类型/学院/年级/名额(1–20)/起止时间/地点/签到方式/凭证图片；结束早于开始、时长≤10 分钟、5 分活动说明<20 字、漏凭证均拒绝；志愿时长固定签到+签退且无分值；提交后类型与分值锁定；学院/年级候选项来自学生名单 |
+| 审核 | 管理员看到凭证图片预览与分值说明；通过→已发布并记录审核人/时间/快照；驳回必须原因，发布者修改后回到待审核，历史审核保留 |
+| 学生浏览 | 小程序活动页仅显示已发布、本人学院年级、未开始的活动；可按类型筛选、按时间排序、下拉刷新；待审核活动对任何人 404 |
+| 报名 | 校验禁报、非发布、已开始、学院年级、重复报名、时间冲突、条件更新名额防超卖；取消在开始前可操作并释放名额；重新报名复用原记录 |
+| 动态二维码 | 活动维度 HMAC 6 位码，每 10 秒换一次；后台「投屏签到码/签退码」渲染成二维码并显示倒计时；当前周期有效，上一周期返回「已失效」；同一周期多人共用 |
+| 签到/签退 | 学生扫描现场动态二维码；开始前后 5 分钟内签到；志愿活动结束前后 5 分钟内扫描签退码，按实际签到/签退差值四舍五入到分钟；未签到直接签退、签退早于签到、扫错类型的码均拒绝 |
+| 账本 | 唯一余额来源 `ledger_entry`：积分与分钟分单位聚合；完成即入账，`(studentId,unit,kind,sourceId)` 唯一保证重复触发不重复入账；明细分页 20 条 |
+| 缺席/禁报 | 定时任务每 30 秒扫描「已报名未签到且开始 5 分钟后」；写 `no_show` 不改正报名状态；第 3 次触发禁报 = 触发时刻 + 7 天，禁报期内再旷按 `+7 + 3×(计数−3)` 顺延；到期自动清零；取消/活动取消不计旷 |
+| 礼品 | 管理员新增/编辑库存/图片/上下架，库存、图片与上下架变更必须填原因并写审计；学生兑换按 `(studentId,giftId,requestId)` 幂等，扣分、减库存、生成兑换码同事务；库存/余额不足拒绝 |
+| 核销 | 12 位兑换码一次性核销，记录核销员与时间；重复核销返回首次核销时间；已过期/不存在拒绝；核销员只有核销入口 |
+| 审计 | 操作人/目标账号均关联姓名与账号，界面显示中文动作名、原因与变更前后字段，可按活动/报名签到/礼品核销/账号安全筛选 |
+| 过期返还 | 订单 7 天未核销：置为已过期 + 返还积分流水 + 库存 +1，同事务且幂等（`expireOrders` 定时执行） |
 
-Prisma8 MySQL 当前early preview，支持读取、raw SQL和事务，拒绝ORM写入和SQL builder行锁。依据[官方支持说明](https://www.prisma.io/docs/orm/supported-databases)，使用 Prisma8 db.raw.sql 参数化写入与 db.transaction；容量以条件UPDATE同事务预留，容量行no-op UPDATE串行化导入，账号行no-op UPDATE串行化绑定与失败计数，唯一约束去重。未降级Prisma7，未使用进程内锁。
+时间统一以 UTC 存储、接口返回 ISO，界面按 `Asia/Shanghai` 展示。
 
-apps/api/prisma/contract.prisma 是8张表完整字段契约，生成JSON/类型已入库，可 npm run contract:emit --workspace apps/api 重建。JSON/BOOLEAN使用Raw原生类型。实际DDL以 prisma/migrations/001_identity.sql 为准（外键、CHECK、原生JSON、DATETIME(3)、二进制标识比较），通过Prisma raw SQL幂等执行并记录schema_migration。未采用preview的schema签名验证，运行时 verifyMarker:false；后续变更必须同步SQL迁移与契约。时间写入和读取UTC，响应ISO时间，业务展示按Asia/Shanghai换算。
+## 主要接口
+
+| 方法与路径 | 说明 |
+|---|---|
+| POST `/auth/admin/login`、`/auth/student/login`、`/auth/wechat/login` | 管理员、账号密码（发布者/核销员/学生）、微信 |
+| GET `/me`、POST `/auth/password`、`/auth/logout` | 会话与改密 |
+| GET `/activities`、`/activities/:id`、`/activities/mine` | 学生列表/详情、发布者列表 |
+| POST `/activities`、PATCH `/activities/:id`、POST `/activities/:id/cancel` | 发布与修改、取消 |
+| POST/DELETE `/activities/:id/registrations` | 报名/取消 |
+| GET `/activities/:id/checkin-code`、`/checkout-code` | 发布者/管理员取当前 10 秒签到码 / 签退码 |
+| POST `/activities/:id/checkin`、`/checkout` | 学生扫码签到、扫码签退（body 带 6 位动态码） |
+| POST `/uploads` | 发布者/管理员上传 PNG/JPEG/WebP/GIF 凭证或礼品图片（≤4MB），返回 `/uploads/...` |
+| GET `/activities/targets` | 发布者/管理员读取学生名单中的学院与年级候选项 |
+| GET `/students/me/home`、`/registrations`、`/ledger?page=`、`/orders` | 学生首页、我的活动、账本、订单 |
+| GET `/gifts`、POST `/gifts/:id/redeem` | 商城与兑换 |
+| POST `/redeemer/redeem` | 核销码 |
+| GET/POST `/admin/activities`、`/admin/activities/:id/review` | 审核队列与结论 |
+| GET/POST `/admin/gifts`、PATCH `/admin/gifts/:id` | 礼品维护（原因必填） |
+| GET/POST `/admin/accounts`、PATCH `/admin/accounts/:id`、POST `/admin/roster/import`、GET `/admin/audits` | 账号、名单、审计 |
 
 ## 验证
 
 ```sh
-npm run build
-npm test
-# 专门测试空库，库名必须以_test结尾；测试会清空该库身份相关表！
-# PowerShell: $env:TEST_DATABASE_URL='mysql://user:password@localhost:3306/campus_test'
-TEST_DATABASE_URL=mysql://user:password@localhost:3306/campus_test npm run test:mysql
-npm audit --omit=dev
+# 1) HTTP 全流程（需可写的测试库，会清空该库）
+$env:DATABASE_URL='mysql://user:pass@127.0.0.1:3306/campus_e2e?allowPublicKeyRetrieval=true'
+$env:E2E_BASE='http://127.0.0.1:3100'
+node tests/e2e.mjs        # 61 项断言
+
+# 2) 领域验收（时长、缺席、禁报公式、过期返还）
+node --env-file=.env tests/domain.mjs     # 18 项断言
+
+# 3) 客户端单元测试
+npm test                  # 9 项断言
 ```
 
-测试覆盖密码/会话、CSV矩阵、微信错误、客户端绑定和角色查询、真实Nest HTTP、强制改密、失败锁定、20人本人隔离、并发容量、11职员并发争10名额、两微信抢绑、旧会话授权、审计与独立连接持久化。测试fixture只写_test库，应用启动不写测试业务数据。
+三套测试均针对真实 MySQL 执行并通过。覆盖：发布校验矩阵、审核通过/驳回、学生可见性、报名冲突/满员/复用、10 秒码过期、签到窗口边界、签退分钟数、扫码签退码校验、图片上传与静态访问、入账幂等、账本余额与分页、三次旷触发禁报与 +3 天顺延、到期清零、兑换幂等/并发扣减、重复核销、过期返还。
 
-实际环境：Windows、Node24.19.0、隔离MySQL8.4.13端口13306；构建、单元/客户端、真实MySQL API集成均执行。Docker不可用，Compose构建启动未执行；未提供真实微信AppID/Secret、开发者工具与真机，真实微信及端到端视觉验收未执行。生产依赖审计0漏洞，开发依赖的Prisma CLI/Composer传递链仍有17项告警（5 moderate/12 high），没有冒充已清零。
+## 已知限制
+
+- 未提供真实微信 AppID/Secret，`code2session` 与真机扫码未在真实微信环境验收；小程序页面在开发者工具中联调。
+- 图片保存在本机 `uploads/` 磁盘并由 API 静态托管，未接入对象存储或 CDN；生产部署需挂载持久卷。
+- 未执行 Docker Compose 与生产部署；本机以隔离 MySQL 实例（127.0.0.1:13306）验证。
+- 活动取消后在「我的 → 已取消」同步，详情展示取消原因。活动变更不发送推送通知。申诉、冲正、统计报表不在本期范围（见 `_bmad-output/planning-artifacts/epics+stories.md` 顶部说明）。

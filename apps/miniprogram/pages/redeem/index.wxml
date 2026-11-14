@@ -1,0 +1,39 @@
+<view class="page">
+  <view class="hero">
+    <view class="hero-top">
+      <text class="hero-kicker">REDEEM DESK</text>
+      <text class="hero-chip" bindtap="logout">退出</text>
+    </view>
+    <text class="hero-title">核销兑换码</text>
+    <text class="hero-sub">{{account ? account.name + ' · ' + account.identifier : '核销员工作台'}}</text>
+  </view>
+
+  <view wx:if="{{notice}}" class="notice">{{notice}}</view>
+
+  <view class="card scan-card">
+    <text class="card-title">扫码核销</text>
+    <text class="muted">对准学生出示的兑换码二维码，核销后不可重复领取。</text>
+    <button class="btn block scan-btn" bindtap="scan" loading="{{busy}}" disabled="{{busy}}">📷 扫描兑换码</button>
+  </view>
+
+  <view class="card">
+    <text class="card-title">手动输入</text>
+    <input class="input code-input" placeholder="12 位兑换码，如 A1B2C3D4E5F6" placeholder-class="ph" maxlength="14" value="{{code}}" bindinput="codeInput" bindconfirm="submitInput" />
+    <button class="btn ghost block" bindtap="submitInput" loading="{{busy}}" disabled="{{busy}}">确认核销</button>
+  </view>
+
+  <view wx:if="{{result}}" class="card result">
+    <view class="between">
+      <text class="strong">{{result.giftName}}</text>
+      <text class="badge green">核销成功</text>
+    </view>
+    <text class="muted">消耗 {{result.pointsText}}</text>
+    <text class="code">{{result.codeText}}</text>
+    <text class="tiny">核销时间 {{result.redeemedText}}</text>
+    <button class="btn block" bindtap="continueScan">继续扫码核销</button>
+  </view>
+
+  <text wx:if="{{error}}" class="error">{{error}}</text>
+
+  <text class="tiny">重复核销会提示首次核销时间；已过期订单不能核销，积分已自动退回学生账户。</text>
+</view>

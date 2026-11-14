@@ -7,6 +7,9 @@
     "test": "node --test tests/*.test.mjs",
     "test:mysql": "node --test tests/mysql.integration.mjs",
     "db:migrate": "npm run db:migrate -w apps/api",
-    "db:seed": "npm run db:seed -w apps/api"
+    "db:seed": "npm run db:seed -w apps/api",
+    "demo:seed": "node --env-file=.env scripts/seed-demo.mjs",
+    "test:e2e": "node tests/e2e.mjs",
+    "test:domain": "node tests/domain.mjs"
   }
 }

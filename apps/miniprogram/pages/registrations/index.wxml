@@ -1,0 +1,34 @@
+<view class="editorial mine">
+  <view class="ed-heading"><text class="ed-title">我的报名</text><button class="ed-link" bindtap="refresh">刷新</button></view>
+  <text wx:if="{{error}}" class="error">{{error}}</text>
+  <view class="ed-tabs">
+    <view wx:for="{{filters}}" wx:key="value" class="ed-tab {{filterIndex === index ? 'on' : ''}}" bindtap="pickFilter" data-index="{{index}}">{{item.label}}</view>
+  </view>
+
+  <text wx:if="{{loading}}" class="empty">加载中…</text>
+
+  <view wx:for="{{visibleItems}}" wx:key="activityId" class="registration-row">
+    <view class="between">
+      <text class="card-title">{{item.title}}</text>
+      <text class="{{item.statusClass}}">{{item.statusText}}</text>
+    </view>
+    <view class="row">
+      <text class="{{item.badgeClass}}">{{item.typeText}}</text>
+      <text class="tiny">{{item.pointsText}}</text>
+    </view>
+    <text class="muted">{{item.timeText}}</text>
+    <text class="tiny">{{item.placeText}}</text>
+    <text wx:if="{{item.checkedInText}}" class="tiny">签到时间 {{item.checkedInText}}</text>
+    <text wx:if="{{item.checkoutHint}}" class="tiny">{{item.checkoutHint}}</text>
+
+    <view class="btn-row">
+      <button class="btn ghost sm" bindtap="openActivity" data-id="{{item.activityId}}">查看活动</button>
+      <button wx:if="{{item.canCheckin}}" class="btn sm" bindtap="openCheckin" data-id="{{item.activityId}}">去扫码签到</button>
+      <button wx:if="{{item.canCheckout}}" class="btn sm" bindtap="openCheckout" data-id="{{item.activityId}}">去扫码签退</button>
+    </view>
+  </view>
+
+  <text wx:if="{{!loading && !items.length && !error}}" class="empty">此状态下暂无报名记录</text>
+
+  <button wx:if="{{items.length > visibleItems.length}}" class="ed-link" bindtap="showMore">查看更多</button>
+</view>

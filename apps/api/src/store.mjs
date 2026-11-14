@@ -4,13 +4,14 @@ import { param } from '@prisma/orm-mysql/relational-core';
 import contractJson from '../prisma/contract.json' with { type: 'json' };
 import { randomUUID } from 'node:crypto';
 import { tokenHash } from './security.mjs';
+import { activitySpec as fullActivitySpec, publicActivity } from './domain.mjs';
 const str = 'mysql/text@1', int = 'mysql/int@1', raw = 'mysql/datetime@1';
 const nullable = codecId => ({ codecId, nullable: true });
-const accountSpec = { id: str, identifier: str, name: str, college: nullable(str), grade: nullable(str), role: str, pool: str, passwordHash: str, wechatOpenid: nullable(str), enabled: int, mustChangePassword: int, failedAttempts: int, lockedUntil: nullable(raw), authorizationExpiresAt: nullable(raw), activityId: nullable(str), createdAt: raw };
+const accountSpec = { id: str, identifier: str, name: str, college: nullable(str), grade: nullable(str), role: str, pool: str, passwordHash: str, wechatOpenid: nullable(str), enabled: int, mustChangePassword: int, failedAttempts: int, lockedUntil: nullable(raw), authorizationExpiresAt: nullable(raw), activityId: nullable(str), noShowCount: int, bannedUntil: nullable(raw), createdAt: raw };
 const activitySpec = { id: str, publisherId: str, title: str, college: str, grade: str, status: str, startsAt: raw, endsAt: raw, capacity: int, enrolled: int };
 // All templates and identifiers originate in this module. Values are driver parameters.
 const utc = value => value instanceof Date ? value.toISOString().slice(0, 23).replace('T', ' ') : value;
-const dates = row => row && Object.fromEntries(Object.entries(row).map(([key, value]) => [key, /(?:At|Until)$/.test(key) && typeof value === 'string' ? new Date(value.includes('T') ? value : value.replace(' ', 'T') + 'Z') : value]));
+const dates = row => row && Object.fromEntries(Object.entries(row).map(([key, value]) => [key, /(?:At|Until)$/.test(key) && typeof value === 'string' ? new Date(/[zZ]$|[+-]\d{2}:?\d{2}$/.test(value) ? value : value.replace(' ', 'T') + 'Z') : value]));
 export class MysqlStore {
   constructor(db, root = db) { this.db = db; this.root = root; }
   static async connect(url) {
@@ -43,7 +44,13 @@ export class MysqlStore {
   async changePassword(id, hash) { await this.exec('UPDATE account SET passwordHash = ?, mustChangePassword = 0 WHERE id = ?', [hash, id]); }
   async loginFailure(accountId, identifier, ip, reason) { await this.exec('INSERT INTO login_failure (id, accountId, identifier, ip, reason, occurredAt) VALUES (?, ?, ?, ?, ?, ?)', [randomUUID(), accountId, identifier, ip || 'unknown', reason, new Date()]); }
   async audit(actorId, targetId, action, reason, before, after) { await this.exec('INSERT INTO audit (id, actorId, targetId, action, reason, beforeValue, afterValue, occurredAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [randomUUID(), actorId, targetId, action, reason, before === null ? null : JSON.stringify(before), after === null ? null : JSON.stringify(after), new Date()]); }
-  async audits() { return this.rows('SELECT id, actorId, targetId, action, reason, CAST(beforeValue AS CHAR) AS beforeValue, CAST(afterValue AS CHAR) AS afterValue, occurredAt FROM audit ORDER BY occurredAt DESC', [], { id: str, actorId: str, targetId: str, action: str, reason: str, beforeValue: nullable(str), afterValue: nullable(str), occurredAt: raw }); }
+  async audits() {
+    return this.rows(
+      'SELECT a.id, a.actorId, COALESCE(ac.name, a.actorId) AS actorName, COALESCE(ac.identifier, \'\') AS actorIdentifier, a.targetId, COALESCE(tc.name, a.targetId) AS targetName, COALESCE(tc.identifier, \'\') AS targetIdentifier, a.action, a.reason, CAST(a.beforeValue AS CHAR CHARACTER SET utf8mb4) AS beforeValue, CAST(a.afterValue AS CHAR CHARACTER SET utf8mb4) AS afterValue, a.occurredAt FROM audit a LEFT JOIN account ac ON ac.id = a.actorId LEFT JOIN account tc ON tc.id = a.targetId ORDER BY a.occurredAt DESC LIMIT 300',
+      [],
+      { id: str, actorId: str, actorName: str, actorIdentifier: str, targetId: str, targetName: str, targetIdentifier: str, action: str, reason: str, beforeValue: nullable(str), afterValue: nullable(str), occurredAt: raw }
+    );
+  }
   async lockCapacity() { await this.exec('UPDATE capacity SET students = students WHERE id = 1'); }
   async identifiers(ids) {
     if (!ids.length) return [];
@@ -64,7 +71,7 @@ export class MysqlStore {
     return { availablePoints: Number(rows.find(r => r.unit === 'POINT')?.total || 0), volunteerMinutes: Number(rows.find(r => r.unit === 'MINUTE')?.total || 0), source: 'ledger_entry' };
   }
   async availableActivities(a) {
-    const rows = await this.rows('SELECT * FROM activity WHERE status = ? AND college = ? AND grade = ? AND startsAt > ? AND enrolled < capacity ORDER BY startsAt, id', ['PUBLISHED', a.college, a.grade, new Date()], activitySpec);
-    return rows.map(({ id, title, startsAt, endsAt, capacity, enrolled }) => ({ id, title, startsAt, endsAt, remainingCapacity: capacity - enrolled }));
+    const rows = await this.rows('SELECT * FROM activity WHERE status = ? AND college = ? AND grade = ? AND startsAt > ? AND enrolled < capacity ORDER BY startsAt, id', ['PUBLISHED', a.college, a.grade, new Date()], fullActivitySpec);
+    return rows.map(row => publicActivity(row));
   }
 }

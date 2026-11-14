@@ -24,6 +24,7 @@ services:
       WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
       ADMIN_ORIGIN: ${ADMIN_ORIGIN:-http://localhost:8080}
       TZ: UTC
+    volumes: ["uploaded-images:/app/uploads"]
     ports: ["3000:3000"]
     depends_on: { mysql: { condition: service_healthy } }
   admin:
@@ -32,3 +33,4 @@ services:
     depends_on: [api]
 volumes:
   mysql-data:
+  uploaded-images:

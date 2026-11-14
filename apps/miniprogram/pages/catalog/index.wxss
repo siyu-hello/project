@@ -1,0 +1,13 @@
+@import "../../styles/editorial.wxss";
+
+.day-group { margin-top: 28rpx; }
+.day-heading { display: block; padding: 13rpx 18rpx; background: #e7ede3; color: #25483d; font-size: 26rpx; font-weight: 700; }
+.agenda-row { display: grid; grid-template-columns: 144rpx minmax(0, 1fr) 24rpx; gap: 15rpx; align-items: start; padding: 22rpx 0; border-bottom: 1rpx solid #ccd7cb; }
+.agenda-time { color: #15594d; font-size: 23rpx; line-height: 1.5; font-weight: 700; font-variant-numeric: tabular-nums; }
+.act-main { display: flex; flex-direction: column; gap: 7rpx; min-width: 0; }
+.act-title { color: #16332c; font-size: 32rpx; line-height: 1.25; font-weight: 700; overflow-wrap: anywhere; }
+.meta { color: #52675e; font-size: 24rpx; }
+.agenda-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8rpx 14rpx; }
+.agenda-capacity { color: #15594d; font-size: 24rpx; }
+.agenda-capacity.full { color: #7c5340; }
+.agenda-arrow { color: #15594d; font-size: 36rpx; line-height: 1; }

@@ -1,0 +1,14 @@
+.scan-card { gap: 16rpx; }
+.scan-btn { height: 96rpx; line-height: 96rpx; font-size: 32rpx; }
+.code-input { font-family: "SF Mono", Menlo, Consolas, monospace; letter-spacing: 2rpx; }
+.result { align-items: stretch; }
+.result .code {
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 40rpx;
+  letter-spacing: 4rpx;
+  font-weight: 600;
+  text-align: center;
+  padding: 16rpx 0;
+  color: #1f5fbf;
+}
+.page > .tiny { line-height: 1.6; }

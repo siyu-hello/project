@@ -1,0 +1,21 @@
+page { background: #f7f6ef; color: #16332c; }
+.login { box-sizing: border-box; min-height: 100vh; padding: 64rpx 48rpx 40rpx; }
+.login-header { padding-bottom: 42rpx; }
+.login-brand { display: block; padding-left: 18rpx; border-left: 6rpx solid #c7804e; font-size: 25rpx; font-weight: 700; letter-spacing: 3rpx; }
+.login-title { display: block; margin: 44rpx 0 12rpx; font-family: "Songti SC", "Noto Serif CJK SC", SimSun, serif; font-size: 82rpx; font-weight: 700; line-height: 1.1; }
+.login-intro { display: block; color: #53675f; font-size: 26rpx; line-height: 1.65; }
+.login-methods { display: flex; border-bottom: 1rpx solid #cdd8cf; margin-bottom: 28rpx; }
+.login button { box-sizing: border-box; border-radius: 0; padding: 0; margin: 0; line-height: normal; }
+.login button::after { border: 0; }
+.login .login-tab { flex: 1; padding: 22rpx 0; border-bottom: 5rpx solid transparent; background: transparent; color: #53675f; font-size: 28rpx; }
+.login .login-tab.selected { color: #15594d; border-color: #15594d; font-weight: 700; }
+.login-form { display: flex; flex-direction: column; gap: 20rpx; }
+.login-field { display: flex; flex-direction: column; gap: 8rpx; color: #25483d; font-size: 25rpx; font-weight: 600; }
+.login-field input { min-height: 72rpx; border-bottom: 1rpx solid #a9bcb1; font-size: 30rpx; font-weight: 400; }
+.login-placeholder { color: #697c73; }
+.login .login-submit { width: 100%; padding: 25rpx 12rpx; border-radius: 12rpx; background: #15594d; color: #fff; font-size: 30rpx; font-weight: 700; }
+.login .login-link { background: transparent; color: #15594d; font-size: 25rpx; padding: 22rpx 0; }
+.login .account-option { display: flex; justify-content: space-between; width: 100%; padding: 22rpx 0; border-bottom: 1rpx solid #cdd8cf; background: transparent; color: #16332c; font-size: 28rpx; }
+.login-message { display: block; margin-bottom: 20rpx; color: #405a50; font-size: 25rpx; }
+.login-message.failed { color: #9c3024; }
+.login-footer { margin-top: 44rpx; padding-top: 20rpx; border-top: 1rpx solid #cdd8cf; color: #53675f; font-size: 23rpx; }

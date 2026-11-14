@@ -1,0 +1,16 @@
+@import "../../styles/editorial.wxss";
+
+.shop-balance { display: flex; align-items: baseline; justify-content: space-between; padding: 18rpx 0; margin-bottom: 26rpx; border-block: 1rpx solid #bccdc1; color: #15594d; font-size: 25rpx; }
+.shop-points { font-family: Georgia, serif; font-size: 52rpx; }
+.gift-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28rpx 20rpx; }
+.shop-item { display: flex; flex-direction: column; min-width: 0; }
+.gift-img, .gift-ph { width: 100%; height: 240rpx; background: #e8ede4; }
+.gift-ph { display: grid; place-items: center; color: #52675e; font-size: 24rpx; }
+.gift-body { display: flex; flex-direction: column; flex: 1; gap: 8rpx; padding-top: 14rpx; }
+.gift-body .between { flex-wrap: wrap; margin-top: auto; }
+.gift-name { font-size: 31rpx; font-weight: 700; }
+.points { color: #15594d; font-weight: 700; font-size: 26rpx; }
+.shop-action { margin: 6rpx 0 0; padding: 0 12rpx; border-radius: 8rpx; background: #15594d; color: white; font-size: 25rpx; line-height: 62rpx; }
+.shop-action[disabled] { background: #e6ebe2; color: #52675e; }
+
+.gift-body .shop-action { box-sizing: border-box; display: flex; align-items: center; justify-content: center; align-self: stretch; width: 100%; height: 64rpx; min-height: 64rpx; padding: 0 8rpx; line-height: 1.2; white-space: nowrap; }

@@ -1,0 +1,6 @@
+{
+  "name": "@campus/miniprogram",
+  "private": true,
+  "type": "commonjs",
+  "description": "微信小程序端（原生 CommonJS 模块，不参与根工作区构建）"
+}

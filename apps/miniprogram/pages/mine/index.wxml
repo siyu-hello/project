@@ -1,0 +1,56 @@
+<view class="editorial mine">
+  <view class="profile-heading">
+    <view class="ed-heading">
+      <text class="ed-title">{{account.name || '我的'}}</text>
+      <button wx:if="{{account}}" class="ed-link" bindtap="logout">退出登录</button>
+    </view>
+    <text wx:if="{{account}}" class="profile-meta">{{account.identifier}}<text wx:if="{{account.college}}"> · {{account.college}}</text><text wx:if="{{account.grade}}"> · {{account.grade}} 级</text></text>
+  </view>
+
+  <view class="balance">
+    <view class="balance-item" bindtap="openLedger">
+      <text class="balance-num">{{points}}</text>
+      <text class="balance-lab">可用积分 ›</text>
+    </view>
+    <view class="balance-item" bindtap="openLedger">
+      <text class="balance-num">{{minutes}}</text>
+      <text class="balance-lab">志愿时长（分钟）›</text>
+    </view>
+  </view>
+
+  <view class="ed-actions"><button class="ed-link" bindtap="openLedger">积分明细 ›</button><button class="ed-link" bindtap="openOrders">我的订单 ›</button></view>
+
+  <view wx:if="{{banText}}" class="notice">{{banText}}</view>
+  <text wx:if="{{error}}" class="error">{{error}}</text>
+
+  <view class="section-title">
+    <text>最近报名</text>
+    <text class="ed-link" bindtap="openRegistrations">查看全部 · {{registrationCount}} 条 ›</text>
+  </view>
+
+  <text wx:if="{{loading}}" class="empty">加载中…</text>
+
+  <view wx:for="{{items}}" wx:key="activityId" class="registration-row">
+    <view class="between">
+      <text class="card-title">{{item.title}}</text>
+      <text class="{{item.statusClass}}">{{item.statusText}}</text>
+    </view>
+    <view class="row">
+      <text class="{{item.badgeClass}}">{{item.typeText}}</text>
+      <text class="tiny">{{item.pointsText}}</text>
+    </view>
+    <text class="muted">{{item.timeText}}</text>
+    <text class="tiny">{{item.placeText}}</text>
+    <text wx:if="{{item.checkedInText}}" class="tiny">签到时间 {{item.checkedInText}}</text>
+    <text wx:if="{{item.checkoutHint}}" class="tiny">{{item.checkoutHint}}</text>
+
+    <view class="btn-row">
+      <button class="btn ghost sm" bindtap="openActivity" data-id="{{item.activityId}}">查看活动</button>
+      <button wx:if="{{item.canCheckin}}" class="btn sm" bindtap="openCheckin" data-id="{{item.activityId}}">去扫码签到</button>
+      <button wx:if="{{item.canCheckout}}" class="btn sm" bindtap="openCheckout" data-id="{{item.activityId}}">去扫码签退</button>
+    </view>
+  </view>
+
+  <text wx:if="{{!loading && !items.length && !error}}" class="empty">暂无报名记录</text>
+
+</view>

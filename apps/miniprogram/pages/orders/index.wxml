@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="between">
+    <view class="stack">
+      <text class="title">我的订单</text>
+      <text class="subtitle">兑换码 7 天内有效，过期自动返还积分</text>
+    </view>
+    <text class="chip" bindtap="refresh">刷新</text>
+  </view>
+
+  <text wx:if="{{error}}" class="error">{{error}}</text>
+  <text wx:if="{{loading}}" class="empty">加载中…</text>
+
+  <view wx:for="{{items}}" wx:key="id" class="card order-card">
+    <view class="order-head">
+      <image wx:if="{{item.imageUrl}}" class="order-img" src="{{item.imageUrl}}" mode="aspectFill" />
+      <view wx:else class="order-img order-ph">🎁</view>
+      <view class="order-title">
+        <view class="between">
+          <text class="strong">{{item.giftName}}</text>
+          <text class="{{item.statusClass}}">{{item.statusText}}</text>
+        </view>
+        <text class="tiny">消耗 {{item.pointsText}} · 下单 {{item.createdText}}</text>
+      </view>
+    </view>
+
+    <view wx:if="{{item.canShowQr}}" class="code-box">
+      <button class="btn block sm" bindtap="openQr" data-id="{{item.id}}">出示兑换二维码</button>
+    </view>
+
+    <view class="between">
+      <text class="tiny">{{item.tipText}}</text>
+      <text wx:if="{{item.countdown}}" class="tiny">{{item.countdown}}</text>
+    </view>
+    <text wx:if="{{item.status === 'RESERVED'}}" class="tiny">有效期至 {{item.expiresText}}</text>
+    <text wx:if="{{item.status === 'REDEEMED'}}" class="tiny">核销时间 {{item.redeemedText}}</text>
+  </view>
+
+  <view wx:if="{{qrOrder}}" class="gift-qr-overlay">
+    <view class="gift-qr-panel">
+      <view class="between"><text class="strong">{{qrOrder.giftName}}</text><button class="btn ghost sm" bindtap="closeQr">关闭</button></view>
+      <canvas canvas-id="giftQr" class="gift-qr-canvas" />
+      <text class="muted center">请让核销员扫描二维码</text>
+      <text class="code center" bindtap="copyCode" data-code="{{qrOrder.code}}">{{qrOrder.codeText}} · 复制</text>
+      <text class="tiny center">有效期至 {{qrOrder.expiresText}}</text>
+    </view>
+  </view>
+
+  <text wx:if="{{!loading && !items.length && !error}}" class="empty">还没有兑换记录，去文创商城看看</text>
+</view>

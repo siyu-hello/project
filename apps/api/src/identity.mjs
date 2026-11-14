@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { DomainError, requireText, assertActive, authorize, hashPassword, verifyPassword, newToken, tokenHash } from './security.mjs';
 import { parseRoster } from './roster.mjs';
-const publicAccount = a => ({ id: a.id, identifier: a.identifier, name: a.name, college: a.college, grade: a.grade, role: a.role, enabled: Boolean(a.enabled), mustChangePassword: Boolean(a.mustChangePassword), authorizationExpiresAt: a.authorizationExpiresAt, activityId: a.activityId });
+const publicAccount = a => ({ id: a.id, identifier: a.identifier, name: a.name, college: a.college, grade: a.grade, role: a.role, enabled: Boolean(a.enabled), mustChangePassword: Boolean(a.mustChangePassword), authorizationExpiresAt: a.authorizationExpiresAt, activityId: a.activityId, noShowCount: a.noShowCount ?? 0, bannedUntil: a.bannedUntil ?? null });
 export class IdentityService {
   constructor(store, wechat, config = {}) { this.store = store; this.wechat = wechat; this.config = config; }
   async authenticate(token) {
@@ -42,6 +42,12 @@ export class IdentityService {
     const identifier = requireText(input.identifier, '账号', 40);
     const password = requireText(input.password, '密码', 128);
     return this.credentials({ identifier, password, ip, admin: true });
+  }
+  async loginPassword(input, ip) {
+    // 本地演示与无微信环境下的账号密码入口；管理员仍只能走 /auth/admin/login。
+    const identifier = requireText(input.identifier, '账号', 40);
+    const password = requireText(input.password, '密码', 128);
+    return this.credentials({ identifier, password, ip });
   }
   async loginWechat(input, ip) {
     const openid = await this.wechat.exchange(requireText(input.code, '微信code', 256));
@@ -164,9 +170,7 @@ export class IdentityService {
         if (!activity || new Date(activity.endsAt) <= new Date()) throw new DomainError(400, '临时授权活动不存在或已结束');
         authorizationExpiresAt = activity.endsAt; activityId = activity.id;
       }
-      // 回收角色同时停用账号，避免 role 与 enabled 出现相互矛盾的状态。
-      const enabled = role === 'REVOKED' ? false : input.enabled ?? Boolean(account.enabled);
-      const updated = { ...account, role, enabled, authorizationExpiresAt, activityId };
+      const updated = { ...account, role, enabled: input.enabled ?? Boolean(account.enabled), authorizationExpiresAt, activityId };
       await tx.updateAccount(updated);
       await tx.audit(actor.id, id, 'ACCOUNT_UPDATE', reason, publicAccount(account), publicAccount(updated));
       return publicAccount(updated);

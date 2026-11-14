@@ -1,0 +1,6 @@
+.page .card.entry { gap: 8rpx; padding: 22rpx 24rpx; }
+.amount-box { display: flex; flex-direction: column; align-items: flex-end; gap: 6rpx; flex-shrink: 0; }
+.amount { font-size: 30rpx; font-weight: 600; }
+.amount.positive { color: #1c7c46; }
+.amount.negative { color: #a83232; }
+.btn.small { height: 60rpx; line-height: 60rpx; font-size: 24rpx; padding: 0 20rpx; min-width: 0; }

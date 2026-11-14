@@ -2,7 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
+import { createRequire } from 'node:module';
 import { createApi } from '../apps/admin/src/api.js';
+const nodeRequire = createRequire(import.meta.url);
+const format = nodeRequire('../apps/miniprogram/utils/format.js');
 test('admin client propagates server lock/error details and clears unauthorized sessions', async () => {
   let cleared = false, sent;
   const api = createApi({ getToken: () => 'token', onUnauthorized: () => { cleared = true; }, fetcher: async (url, init) => { sent = init; return { ok: false, status: 401, json: async () => ({ message: '登录已过期' }) }; } });
@@ -12,7 +15,8 @@ test('admin client propagates server lock/error details and clears unauthorized 
 });
 async function loadPage(path, request, wx = {}) {
   let page;
-  vm.runInNewContext(await readFile(new URL(path, import.meta.url), 'utf8'), { require: () => ({ request }), wx, Page: definition => { page = definition; } });
+  const api = { request, get: target => request(target), post: (target, body) => request(target, 'POST', body), del: target => request(target, 'DELETE'), clearSession() {}, logout: () => Promise.resolve() };
+  vm.runInNewContext(await readFile(new URL(path, import.meta.url), 'utf8'), { require: spec => (String(spec).includes('format') ? format : String(spec).includes('registration') ? nodeRequire('../apps/miniprogram/utils/registration.js') : api), wx, setInterval: () => 1, clearInterval() {}, Page: definition => { page = definition; } });
   page.setData = values => Object.assign(page.data, values);
   return page;
 }
@@ -21,17 +25,29 @@ test('mini-program first binding, one-click account selection and login failure 
   const page = await loadPage('../apps/miniprogram/pages/login/index.js', async (path, method, body) => { calls.push(body); return { token: 'opaque', account: { role: 'STUDENT' } }; }, { login: ({success}) => success({code:'wx-code'}), setStorageSync: (...args) => saved.push(args), reLaunch: args => navigations.push(args) });
   page.data.identifier = '001'; page.data.password = '123456';
   await page.login({ currentTarget: { dataset: { bind: true } } });
-  assert.equal(calls[0].identifier, '001'); assert.equal(calls[0].password, '123456'); assert.equal(saved.length, 1); assert.equal(saved[0][0], 'session'); assert.equal(page.data.password, ''); assert.equal(navigations[0].url, '/pages/home/index');
+  assert.equal(calls[0].identifier, '001'); assert.equal(calls[0].password, '123456'); assert.equal(saved.length, 1); assert.equal(saved[0][0], 'session'); assert.equal(page.data.password, ''); assert.equal(navigations[0].url, '/pages/catalog/index');
   const fail = await loadPage('../apps/miniprogram/pages/login/index.js', async () => { throw new Error('账号尚未开通'); }, { login: ({success}) => success({code:'code'}) });
   fail.data.identifier = '001';
   await fail.login({currentTarget:{dataset:{}}}); assert.match(fail.data.error, /尚未开通/); assert.equal(fail.data.busy, false); assert.equal(fail.data.identifier, '001');
 });
-test('mini-program requests student query only for students and clears stale data before retry', async () => {
-  const paths = [];
-  const page = await loadPage('../apps/miniprogram/pages/home/index.js', async path => { paths.push(path); return { id: 'p', role: 'PUBLISHER' }; });
-  page.data.summary = { availablePoints: 999 }; await page.onShow(); assert.deepEqual(paths, ['/me']); assert.equal(page.data.summary, null); assert.equal(page.data.account.role, 'PUBLISHER');
-  const student = await loadPage('../apps/miniprogram/pages/home/index.js', async path => path === '/me' ? {role:'STUDENT'} : { account:{role:'STUDENT'}, summary:{availablePoints:0,volunteerMinutes:0}, activities:[] });
-  await student.onShow(); assert.equal(student.data.summary.availablePoints, 0);
+test('mini-program catalog only asks students for the activity feed and keeps personal profile out of it', async () => {
+  const paths = [], navigations = [];
+  const page = await loadPage('../apps/miniprogram/pages/catalog/index.js', async path => { paths.push(path); return path === '/me' ? { id: 'p', role: 'PUBLISHER' } : []; }, { setNavigationBarTitle() {}, reLaunch: value => navigations.push(value), removeStorageSync() {} });
+  await page.onShow();
+  assert.deepEqual(paths, ['/me']);
+  assert.equal(page.data.account, undefined);
+  assert.equal(navigations[0].url, '/pages/login/index');
+
+  const studentPaths = [];
+  const student = await loadPage('../apps/miniprogram/pages/catalog/index.js', async path => {
+    studentPaths.push(path);
+    return path === '/me' ? { role: 'STUDENT', college: '计算机学院', grade: '26' } : [{ id: 'a1', title: '清洁志愿', type: 'MINUTE', points: 0, capacity: 10, enrolled: 2, remainingCapacity: 8, startsAt: new Date(Date.now() + 3600000).toISOString(), endsAt: new Date(Date.now() + 7200000).toISOString() }];
+  }, { setNavigationBarTitle() {}, reLaunch() {}, removeStorageSync() {} });
+  await student.onShow();
+  assert.deepEqual(studentPaths, ['/me', '/activities']);
+  assert.equal(student.data.items.length, 1);
+  assert.equal(student.data.items[0].capacityText, '剩余 8 / 10 个名额');
+  assert.equal(student.data.items[0].typeText, '志愿时长');
 });
 test('mini-program preserves binding form on credential 401 but redirects expired sessions', async () => {
   const redirects = [], removals = [], exported = {};
@@ -49,5 +65,54 @@ test('mini-program renders distinguishable account choices and retries either ac
   for (const id of ['one','two']) await page.login({currentTarget:{dataset:{id}}});
   assert.deepEqual(saved,['one','two']); assert.equal(calls[1].accountId,'one'); assert.equal(calls[2].accountId,'two'); assert.notEqual(calls[1].code,calls[2].code);
   const markup = await readFile(new URL('../apps/miniprogram/pages/login/index.wxml', import.meta.url),'utf8'); assert.ok(markup.includes('{{item.identifier}}'));
-  const home = await readFile(new URL('../apps/miniprogram/pages/home/index.wxml', import.meta.url),'utf8'); assert.match(home, /<\/block><button bindtap="logout">/);
+  const home = await readFile(new URL('../apps/miniprogram/pages/catalog/index.wxml', import.meta.url),'utf8'); assert.match(home, /bindtap="openActivity"/); assert.doesNotMatch(home, /availablePoints|volunteerMinutes/);
+  const mine = await readFile(new URL('../apps/miniprogram/pages/mine/index.wxml', import.meta.url),'utf8'); assert.match(mine, /class="profile-heading"/); assert.match(mine, /bindtap="logout"/);
+  const app = JSON.parse(await readFile(new URL('../apps/miniprogram/app.json', import.meta.url),'utf8')); assert.deepEqual(app.tabBar.list.map(item => item.text), ['活动', '商城', '我的']);
+});
+
+test('cancelled activities appear in the cancelled filter without attendance actions', async () => {
+  const page = await loadPage('../apps/miniprogram/pages/registrations/index.js', async path => {
+    if (path === '/me') return { role: 'STUDENT', name: '学生' };
+    if (path === '/students/me/home') return { summary: {} };
+    return [
+      { activityId: 'a1', status: 'CHECKED_IN', activityStatus: 'CANCELLED', checkinMode: 'BOTH' },
+      { activityId: 'a2', status: 'REGISTERED', activityStatus: 'PUBLISHED' }
+    ];
+  });
+  await page.load();
+  page.pickFilter({ currentTarget: { dataset: { index: 4 } } });
+  assert.equal(page.data.items.length, 1);
+  assert.equal(page.data.items[0].activityId, 'a1');
+  assert.equal(page.data.items[0].statusText, '活动已取消');
+  assert.equal(page.data.items[0].canCheckout, false);
+});
+
+test('activity detail updates attendance availability when the window opens', async () => {
+  const page = await loadPage('../apps/miniprogram/pages/activity/index.js', async () => ({}));
+  const now = Date.now();
+  const activity = {
+    title: '活动', type: 'POINT', checkinMode: 'BOTH', status: 'PUBLISHED',
+    startsAt: new Date(now - 30 * 60000).toISOString(),
+    endsAt: new Date(now + 6 * 60000).toISOString()
+  };
+  const registration = { status: 'CHECKED_IN' };
+  page.render(activity, registration, {});
+  assert.equal(page.data.canCheckout, false);
+  page.serverOffset = 2 * 60000;
+  page.render(activity, registration, {});
+  assert.equal(page.data.canCheckout, true);
+  page.render({ ...activity, status: 'CANCELLED' }, registration, {});
+  assert.equal(page.data.canCheckout, false);
+});
+
+test('profile shows only two registrations while retaining the total count', async () => {
+  const records = Array.from({ length: 24 }, (_, index) => ({ activityId: 'a' + index, title: '活动' }));
+  const page = await loadPage('../apps/miniprogram/pages/mine/index.js', async path => {
+    if (path === '/me') return { role: 'STUDENT', name: '学生' };
+    if (path === '/students/me/home') return { summary: {} };
+    return records;
+  });
+  await page.load();
+  assert.equal(page.data.registrationCount, 24);
+  assert.equal(page.data.items.length, 2);
 });

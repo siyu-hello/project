@@ -4,3 +4,5 @@ dist/
 .npm-cache/
 coverage/
 .mysql-test/
+.local/
+uploads/

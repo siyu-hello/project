@@ -1,0 +1,93 @@
+<view class="page">
+  <text wx:if="{{loading}}" class="empty">加载中…</text>
+
+  <block wx:if="{{error}}">
+    <view class="card">
+      <text class="error">{{error}}</text>
+      <button class="btn ghost block" bindtap="retry">重新加载</button>
+    </view>
+  </block>
+
+  <block wx:if="{{view}}">
+    <view class="hero act-hero">
+      <view class="hero-top">
+        <text class="badge {{view.badgeClass === 'badge green' ? 'green-badge' : 'light-badge'}}">{{view.typeText}}</text>
+        <text class="hero-points">{{view.pointsText}}</text>
+      </view>
+      <text class="hero-title act-name">{{view.title}}</text>
+      <text class="hero-sub">{{view.timeText}}</text>
+      <text class="hero-sub">📍 {{view.placeText}}</text>
+    </view>
+
+    <view class="card">
+      <view class="info-row"><text class="k">面向对象</text><text class="v">{{view.targetText}}</text></view>
+      <view class="info-row"><text class="k">剩余名额</text><text class="v">{{view.capacityText}}</text></view>
+      <view class="info-row"><text class="k">签到方式</text><text class="v">{{view.checkinText}}</text></view>
+      <view class="info-row"><text class="k">活动状态</text><text class="v">{{view.cancelled ? '已取消' : '已发布'}}</text></view>
+    </view>
+
+    <view wx:if="{{view.cancelled}}" class="notice">活动已取消<text wx:if="{{view.cancelReason}}"> · {{view.cancelReason}}</text></view>
+
+    <view wx:if="{{banText}}" class="notice">{{banText}}</view>
+
+    <view wx:if="{{view.statusText}}" class="card">
+      <view class="between">
+        <text class="card-title">我的报名</text>
+        <text class="{{view.statusClass}}">{{view.statusText}}</text>
+      </view>
+      <text wx:if="{{view.registeredAtText}}" class="muted">报名时间 {{view.registeredAtText}}</text>
+      <text wx:if="{{view.checkedInText}}" class="muted">签到时间 {{view.checkedInText}}</text>
+      <text wx:if="{{view.checkedOutText}}" class="muted">签退时间 {{view.checkedOutText}}</text>
+      <text class="tiny">{{checkinHint}}</text>
+    </view>
+
+    <view wx:else class="card">
+      <text class="card-title">我的报名</text>
+      <text class="tiny">{{checkinHint}}</text>
+    </view>
+
+    <view wx:if="{{!view.cancelled}}" class="card">
+      <text class="card-title">报名与签到</text>
+
+      <button wx:if="{{canRegister}}" class="btn block" bindtap="register" loading="{{busy === 'register'}}" disabled="{{busy !== ''}}">立即报名</button>
+      <text wx:if="{{view.full}}" class="muted">名额已满，可关注后续场次。</text>
+      <text wx:if="{{banText}}" class="muted">禁报期内暂不能报名新活动，已报名的活动仍可签到与入账。</text>
+
+      <button wx:if="{{canCancel}}" class="btn danger block" bindtap="cancel" loading="{{busy === 'cancel'}}" disabled="{{busy !== ''}}">取消报名</button>
+
+      <view wx:if="{{canCheckin}}" class="scan-panel">
+        <view class="window open"><view class="dot"></view><text>{{checkinWindowText}}</text></view>
+        <button class="btn block scan-btn" bindtap="scanCheckin" loading="{{busy === 'checkin'}}" disabled="{{busy !== ''}}">📷 扫码签到</button>
+        <text class="tiny center" bindtap="toggleCheckinInput">{{checkinOpen ? '收起手动输入' : '扫不了？手动输入动态码'}}</text>
+        <block wx:if="{{checkinOpen}}">
+          <input class="input" placeholder="6 位现场动态码" placeholder-class="ph" maxlength="6" value="{{code}}" bindinput="codeInput" bindconfirm="submitCheckinCode" />
+          <button class="btn ghost block" bindtap="submitCheckinCode" loading="{{busy === 'checkin'}}" disabled="{{busy !== ''}}">提交签到码</button>
+        </block>
+        <text class="tiny">动态码每 10 秒刷新，截图转发会失效；请扫描现场投屏二维码。</text>
+      </view>
+
+      <view wx:if="{{canCheckout}}" class="scan-panel">
+        <view class="window open"><view class="dot"></view><text>{{checkoutWindowText}}</text></view>
+        <button class="btn block scan-btn" bindtap="scanCheckout" loading="{{busy === 'checkout'}}" disabled="{{busy !== ''}}">📷 扫码签退</button>
+        <text class="tiny center" bindtap="toggleCheckoutInput">{{checkoutOpen ? '收起手动输入' : '扫不了？手动输入动态码'}}</text>
+        <block wx:if="{{checkoutOpen}}">
+          <input class="input" placeholder="6 位现场签退动态码" placeholder-class="ph" maxlength="6" value="{{checkoutCode}}" bindinput="checkoutCodeInput" bindconfirm="submitCheckoutCode" />
+          <button class="btn ghost block" bindtap="submitCheckoutCode" loading="{{busy === 'checkout'}}" disabled="{{busy !== ''}}">提交签退码</button>
+        </block>
+        <text class="tiny">签退后按活动规则入账。</text>
+      </view>
+
+      <text wx:if="{{attendanceWindowText && !canCheckin && !canCheckout}}" class="tiny">{{attendanceWindowText}}</text>
+
+      <text wx:if="{{actionNote}}" class="success">{{actionNote}}</text>
+      <text wx:if="{{actionError}}" class="error">{{actionError}}</text>
+    </view>
+
+    <view wx:if="{{view.description}}" class="card">
+      <text class="card-title">活动说明</text>
+      <text class="muted">{{view.description}}</text>
+    </view>
+
+    <text class="tiny center">签到与签退均使用现场动态二维码，不支持截图或转发</text>
+  </block>
+</view>

@@ -1,0 +1,12 @@
+page { background: #f7f6ef; color: #16332c; }
+.editorial { padding: 48rpx 36rpx 56rpx; }
+.ed-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 14rpx; margin-bottom: 30rpx; }
+.ed-title { font-family: "Songti SC", "Noto Serif CJK SC", SimSun, serif; font-size: 68rpx; line-height: 1.15; font-weight: 700; }
+.editorial .ed-link { padding: 10rpx 0; margin: 0; background: transparent; color: #15594d; font-size: 24rpx; line-height: 1.5; white-space: nowrap; }
+.editorial .ed-link::after, .shop-action::after { border: 0; }
+.ed-tabs { display: flex; align-items: stretch; gap: 18rpx; flex-wrap: wrap; border-bottom: 1rpx solid #bccdc1; }
+.ed-tab { padding: 18rpx 0; font-size: 25rpx; color: #52675e; border-bottom: 4rpx solid transparent; }
+.ed-tab.on { color: #15594d; border-color: #15594d; font-weight: 700; }
+.ed-tabs .sort { margin-left: auto; align-self: center; }
+.ed-note { display: block; color: #52675e; font-size: 23rpx; margin-top: 26rpx; }
+.editorial .tiny, .editorial .muted { color: #52675e; }

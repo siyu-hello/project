@@ -1,1 +1,33 @@
-{"pages":["pages/login/index","pages/home/index"],"window":{"navigationBarTitleText":"校园活动","navigationBarBackgroundColor":"#f4f7fb"}}
+{
+  "pages": [
+    "pages/login/index",
+    "pages/catalog/index",
+    "pages/gifts/index",
+    "pages/mine/index",
+    "pages/registrations/index",
+    "pages/activity/index",
+    "pages/ledger/index",
+    "pages/orders/index",
+    "pages/redeem/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "校园活动",
+    "navigationBarBackgroundColor": "#f7f6ef",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f7f6ef",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": true
+  },
+  "tabBar": {
+    "color": "#7a879c",
+    "selectedColor": "#17695d",
+    "backgroundColor": "#f7f6ef",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/catalog/index", "text": "活动" },
+      { "pagePath": "pages/gifts/index", "text": "商城" },
+      { "pagePath": "pages/mine/index", "text": "我的" }
+    ]
+  },
+  "style": "v2"
+}

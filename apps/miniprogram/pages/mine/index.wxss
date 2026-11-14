@@ -1,0 +1,17 @@
+@import "../../styles/editorial.wxss";
+
+.profile-heading { padding-bottom: 28rpx; }
+.profile-heading .ed-heading { margin-bottom: 12rpx; }
+.profile-heading .ed-title { overflow-wrap: anywhere; }
+.profile-meta { display: block; font-size: 26rpx; color: #52675e; line-height: 1.6; }
+.balance { display: grid; grid-template-columns: 1fr 1fr; padding: 18rpx 0; border-block: 1rpx solid #bccdc1; }
+.balance-item + .balance-item { padding-left: 22rpx; border-left: 1rpx solid #bccdc1; }
+.balance-num, .balance-lab { display: block; color: #15594d; }
+.balance-num { font-family: Georgia, serif; font-size: 52rpx; }
+.balance-lab { font-size: 24rpx; }
+.ed-actions { display: flex; gap: 30rpx; padding: 14rpx 0; }
+.mine .section-title { margin-top: 25rpx; }
+.registration-row { display: flex; flex-direction: column; gap: 9rpx; padding: 24rpx 0; border-bottom: 1rpx solid #ccd7cb; }
+.registration-row .badge { flex-shrink: 0; }
+.registration-row .btn-row { margin-top: 8rpx; }
+.mine .footer { margin-top: 30rpx; }
